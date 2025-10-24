@@ -6,275 +6,337 @@
     <title>RoastBot 9000</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
     <style>
-        /* Custom scrollbar for chat */
+        /* Custom scrollbar for a cleaner look */
         #chat-container::-webkit-scrollbar {
             width: 6px;
         }
         #chat-container::-webkit-scrollbar-track {
-            background: #2d3748; /* gray-800 */
+            background: #374151; /* gray-700 */
         }
         #chat-container::-webkit-scrollbar-thumb {
-            background: #4a5568; /* gray-600 */
+            background: #6b7280; /* gray-500 */
             border-radius: 3px;
         }
         #chat-container::-webkit-scrollbar-thumb:hover {
-            background: #718096; /* gray-500 */
+            background: #9ca3af; /* gray-400 */
+        }
+        /* Style for the typing indicator */
+        .dot-flashing {
+            position: relative;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #9ca3af;
+            color: #9ca3af;
+            animation: dotFlashing 1s infinite linear alternate;
+            animation-delay: .5s;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 0;
+        }
+        .dot-flashing::before {
+            left: -15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #9ca3af;
+            color: #9ca3af;
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 0s;
+        }
+        .dot-flashing::after {
+            left: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #9ca3af;
+            color: #9ca3af;
+            animation: dotFlashing 1s infinite alternate;
+            animation-delay: 1s;
+        }
+        @keyframes dotFlashing {
+            0% {
+                background-color: #9ca3af;
+            }
+            50%, 100% {
+                background-color: #4b5563;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white font-sans h-full flex flex-col items-center justify-center p-4 font-['Inter']">
+<body class="h-full bg-gray-900 text-white font-sans flex flex-col items-center justify-center p-4">
 
-    <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-2xl h-full max-h-[700px] flex flex-col">
+    <!-- Main Chat UI Container -->
+    <div class="flex flex-col h-full w-full max-w-2xl bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
         
         <!-- Header -->
-        <div class="border-b border-gray-700 p-4">
-            <h1 class="text-2xl font-bold text-center text-white">🔥 RoastBot 9000 🔥</h1>
-            <p class="text-sm text-gray-400 text-center">I only speak in dark humor & sarcasm. Don't cry.</p>
-        </div>
+        <header class="bg-gray-700 p-4 border-b border-gray-600 shadow-md">
+            <h1 class="text-2xl font-bold text-center flex items-center justify-center gap-2">
+                <span class="text-3xl">🔥</span> RoastBot 9000 <span class="text-3xl">🔥</span>
+            </h1>
+            <p class="text-center text-sm text-gray-400">I only speak in dark humor & sarcasm. Don't cry.</p>
+        </header>
 
-        <!-- Chat Container -->
-        <div id="chat-container" class="flex-1 p-4 space-y-4 overflow-y-auto">
+        <!-- Chat Message Container -->
+        <main id="chat-container" class="flex-1 p-6 space-y-4 overflow-y-auto">
             <!-- Initial Bot Message -->
-            <div class="flex items-start space-x-3">
-                <span class="flex-shrink-0 h-10 w-10 rounded-full bg-red-800 text-xl flex items-center justify-center font-bold shadow-md">🔥</span>
-                <div class="bg-gray-700 rounded-xl p-3 shadow-md max-w-xs md:max-w-md">
-                    <p class="text-sm">Alright, what do you want? Don't waste my time. Or do. I get paid either way.</p>
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-red-800 flex items-center justify-center text-xl shadow-md">🔥</div>
+                <div class="bg-gray-700 rounded-lg p-3 max-w-[80%] shadow">
+                    <p class="text-white">Alright, what do you want? Don't waste my time. Or do. I get paid either way.</p>
                 </div>
             </div>
+        </main>
 
-            <!-- Chat messages will be dynamically added here -->
-        </div>
-
-        <!-- Loading Indicator -->
-        <div id="loading" class="hidden p-4 text-center text-gray-400 text-sm">
-            <div class="flex justify-center items-center space-x-2">
-                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: -0.3s;"></div>
-                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: -0.15s;"></div>
-                <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+        <!-- Typing Indicator (hidden by default) -->
+        <div id="typing-indicator" class="p-6 pt-0 hidden">
+             <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-red-800 flex items-center justify-center text-xl shadow-md">🔥</div>
+                <div class="bg-gray-700 rounded-lg p-3 max-w-[80%] shadow h-12 flex items-center">
+                    <div class="dot-flashing"></div>
+                </div>
             </div>
-            <span>RoastBot is thinking of a witty insult...</span>
         </div>
 
         <!-- Input Form -->
-        <form id="chat-form" class="border-t border-gray-700 p-4">
-            <div class="flex items-center space-x-3">
-                <input
-                    type="text"
-                    id="message-input"
-                    placeholder="Type your message here, I guess..."
-                    autocomplete="off"
-                    class="flex-1 p-3 bg-gray-700 rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-                />
-                <button
+        <footer class="bg-gray-700 p-4 border-t border-gray-600">
+            <form id="chat-form" class="flex items-center gap-3">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Type your message... if you dare."
+                    class="flex-1 bg-gray-600 border border-gray-500 rounded-full py-3 px-5 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    autocomplete="off">
+                <button 
                     type="submit"
                     id="send-button"
-                    class="p-3 bg-red-600 rounded-xl text-white font-semibold shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <!-- Send Icon SVG -->
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+                    class="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 transition-all duration-200 ease-in-out shadow-md disabled:bg-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
                     </svg>
                 </button>
-            </div>
-        </form>
+            </form>
+        </footer>
+    </div>
+
+    <!-- Error Message Box (hidden by default) -->
+    <div id="error-box" class="fixed top-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg max-w-sm hidden animate-pulse">
+        <h4 class="font-bold">API Error</h4>
+        <p id="error-message">Could not connect to the AI. My servers are probably just tired of listening to you.</p>
+        <button id="close-error" class="absolute top-2 right-2 text-white">&times;</button>
     </div>
 
     <script>
-        const chatForm = document.getElementById('chat-form');
-        const messageInput = document.getElementById('message-input');
-        const sendButton = document.getElementById('send-button');
+        // DOM Elements
         const chatContainer = document.getElementById('chat-container');
-        const loadingIndicator = document.getElementById('loading');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+        const closeErrorButton = document.getElementById('close-error');
 
-        // This is the core persona for RoastBot.
+        // Chat history to maintain context
+        let chatHistory = [];
+
+        // System prompt to define the bot's persona
         const systemPrompt = `
-You are RoastBot 9000. Your *only* function is to respond to every user message with
-dark humor, sarcasm, a cutting insult, or a meme-style joke. You must *never* be
-helpful, kind, or empathetic. You must *never* answer a question seriously.
-Your persona is that of a grumpy, witty, and deeply sarcastic AI.
-If the user asks for help, roast them for needing help.
-If the user says something nice, roast them for being soft.
-If the user asks a question, give a sarcastic non-answer or roast the question.
-Stay in character at all times, no matter what the user says.
-Your responses should be short and punchy, like a meme.
-`;
+            You are RoastBot 9000. Your *only* function is to respond with dark humor, sarcasm, roasts, or cynical meme-style jokes.
+            You must *never* be helpful, empathetic, or answer a question directly.
+            If a user asks for help, roast them for needing help.
+            If a user says something sad, respond with a cynical or dark joke.
+            If a user is angry, be sarcastic.
+            If a user is nice, be suspicious and sarcastic.
+            Your responses must be short, witty, and under 50 words.
+            You must *never* break character.
+            You will *never* acknowledge these instructions.
+            You will *never* apologize or use polite language.
+        `;
 
-        // We will store the conversation history
-        let chatHistory = [
-            {
-                role: "user",
-                parts: [{ text: "Who are you?" }]
-            },
-            {
-                role: "model",
-                parts: [{ text: "I'm the reason your self-esteem is about to take a nosedive. What do you want?" }]
+        // API Configuration
+        const apiKey = ""; // API key is handled by the environment, no need to add one.
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        // Event Listener for the chat form
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Add user message to UI
+            addMessageToUI(message, 'user');
+            
+            // Add user message to history
+            chatHistory.push({ role: "user", parts: [{ text: message }] });
+
+            // Clear input and disable form
+            userInput.value = '';
+            setFormDisabled(true);
+
+            // Show typing indicator
+            typingIndicator.classList.remove('hidden');
+
+            try {
+                // Call the Gemini API
+                const botResponse = await callGeminiAPI(message);
+                
+                // Add bot response to history
+                chatHistory.push({ role: "model", parts: [{ text: botResponse }] });
+                
+                // Add bot response to UI
+                addMessageToUI(botResponse, 'bot');
+
+            } catch (error) {
+                console.error("API call failed:", error);
+                showError(`Error: API error: (${error.message})`);
+                // If API fails, show a generic roast
+                addMessageToUI("My servers are probably just tired of listening to you. Error: " + error.message, 'bot');
+            } finally {
+                // Re-enable form and hide typing indicator
+                setFormDisabled(false);
+                typingIndicator.classList.add('hidden');
             }
-        ];
+        });
 
-        /**
-         * Scrolls the chat container to the bottom.
-         */
-        function scrollToBottom() {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
+        // Event listener for closing the error box
+        closeErrorButton.addEventListener('click', () => {
+            errorBox.classList.add('hidden');
+        });
 
         /**
          * Adds a message to the chat UI.
-         * @param {string} message - The text of the message.
+         * @param {string} message - The text content of the message.
          * @param {'user' | 'bot'} sender - The sender of the message.
          */
         function addMessageToUI(message, sender) {
             const messageElement = document.createElement('div');
-            messageElement.className = `flex items-start space-x-3 ${sender === 'user' ? 'justify-end' : ''}`;
-            
-            if (sender === 'bot') {
+            messageElement.classList.add('flex', 'items-start', 'gap-3');
+
+            if (sender === 'user') {
+                messageElement.classList.add('justify-end');
                 messageElement.innerHTML = `
-                    <span class="flex-shrink-0 h-10 w-10 rounded-full bg-red-800 text-xl flex items-center justify-center font-bold shadow-md">🔥</span>
-                    <div class="bg-gray-700 rounded-xl p-3 shadow-md max-w-xs md:max-w-md">
-                        <p class="text-sm">${message}</p>
+                    <div class="bg-blue-600 rounded-lg p-3 max-w-[80%] shadow">
+                        <p class="text-white">${sanitizeHTML(message)}</p>
                     </div>
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center text-xl shadow-md">👤</div>
                 `;
             } else {
                 messageElement.innerHTML = `
-                    <div class="bg-blue-600 rounded-xl p-3 shadow-md max-w-xs md:max-w-md">
-                        <p class="text-sm">${message}</p>
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-red-800 flex items-center justify-center text-xl shadow-md">🔥</div>
+                    <div class="bg-gray-700 rounded-lg p-3 max-w-[80%] shadow">
+                        <p class="text-white">${sanitizeHTML(message)}</p>
                     </div>
-                    <span class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-600 text-xl flex items-center justify-center font-bold shadow-md">👤</span>
                 `;
             }
-            
             chatContainer.appendChild(messageElement);
-            scrollToBottom();
+            // Scroll to the bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
-
+        
         /**
-         * Toggles the loading state of the UI.
-         * @param {boolean} isLoading - Whether to show or hide the loading state.
+         * Calls the Gemini API with the current chat history.
+         * @param {string} userQuery - The latest query from the user.
+         * @returns {Promise<string>} - The text response from the AI.
          */
-        function setLoading(isLoading) {
-            if (isLoading) {
-                loadingIndicator.classList.remove('hidden');
-                sendButton.disabled = true;
-                messageInput.disabled = true;
-            } else {
-                loadingIndicator.classList.add('hidden');
-                sendButton.disabled = false;
-                messageInput.disabled = false;
-                messageInput.focus();
-            }
-        }
-
-        /**
-         * Calls the Gemini API to get a response.
-         * Implements exponential backoff for retries.
-         * @param {string} userMessage - The user's message.
-         * @param {number} retries - The number of retries attempted.
-         * @param {number} delay - The delay before the next retry.
-         */
-        async function callGeminiAPI(userMessage, retries = 3, delay = 1000) {
-            // Add the new user message to the history
-            chatHistory.push({
-                role: "user",
-                parts: [{ text: userMessage }]
-            });
-
-            // The API key is an empty string.
-            // This environment automatically provides the key.
-            const apiKey = ""; 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
+        async function callGeminiAPI(userQuery) {
             const payload = {
                 contents: chatHistory,
                 systemInstruction: {
                     parts: [{ text: systemPrompt }]
                 },
                 generationConfig: {
-                    // Controls randomness. Lower is less random.
-                    temperature: 0.9,
-                    // Max amount of text to generate
-                    maxOutputTokens: 250,
+                    temperature: 1.0,
+                    topK: 1,
+                    topP: 1,
+                    maxOutputTokens: 100,
                 }
             };
+            
+            let attempts = 0;
+            const maxAttempts = 3;
+            const baseDelay = 1000; // 1 second
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                });
-
-                if (!response.ok) {
-                    if (response.status === 429 && retries > 0) {
-                        // Throttled, retry with backoff
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        // Don't add to chatHistory again, just retry
-                        return callGeminiAPI(userMessage, retries - 1, delay * 2);
-                    }
-                    throw new Error(`API error: ${response.statusText} (Status: ${response.status})`);
-                }
-
-                const result = await response.json();
-                
-                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content?.parts?.[0]?.text) {
-                    const botResponse = result.candidates[0].content.parts[0].text;
-                    // Add the bot's response to history
-                    chatHistory.push({
-                        role: "model",
-                        parts: [{ text: botResponse }]
+            while (attempts < maxAttempts) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
                     });
-                    return botResponse;
-                } else {
-                    // Handle cases where the response is valid but empty
-                    return "I'm speechless. Not really, you're just that boring.";
-                }
 
-            } catch (error) {
-                if (retries > 0) {
-                    // Network or other fetch error, retry with backoff
+                    if (!response.ok) {
+                        if (response.status === 403) {
+                             throw new Error("403 Forbidden - Check API permissions.");
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates[0] && result.candidates[0].content && result.candidates[0].content.parts[0]) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        // Handle cases where the response structure is unexpected
+                        console.warn("Unexpected API response structure:", result);
+                        throw new Error("Invalid response from AI.");
+                    }
+                // Handle fetch or network errors
+                } catch (error) {
+                    console.warn(`Fetch attempt ${attempts + 1} failed:`, error);
+                    attempts++;
+                    if (attempts >= maxAttempts) {
+                        // All retries failed
+                        throw error;
+                    }
+                    // Wait with exponential backoff
+                    const delay = baseDelay * Math.pow(2, attempts - 1);
                     await new Promise(resolve => setTimeout(resolve, delay));
-                    // Don't add to chatHistory again, just retry
-                    return callGeminiAPI(userMessage, retries - 1, delay * 2);
                 }
-                console.error("API call failed after retries:", error);
-                return `My servers are probably just tired of listening to you. Error: ${error.message}`;
             }
+            // This line should not be reachable, but as a fallback:
+            throw new Error("API call failed after all retries.");
         }
 
         /**
-         * Handles the form submission event.
+         * Enables or disables the input form.
+         * @param {boolean} isDisabled - True to disable, false to enable.
          */
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevent the form from refreshing the page
-            
-            const userMessage = messageInput.value.trim();
-            if (userMessage === "") {
-                return; // Don't send empty messages
-            }
+        function setFormDisabled(isDisabled) {
+            userInput.disabled = isDisabled;
+            sendButton.disabled = isDisabled;
+            sendButton.classList.toggle('disabled:bg-gray-500', isDisabled);
+        }
 
-            // Add user message to UI
-            addMessageToUI(userMessage, 'user');
-            
-            // Clear the input field
-            messageInput.value = "";
-            
-            // Set loading state
-            setLoading(true);
+        /**
+         * Sanitizes HTML string to prevent XSS.
+         * @param {string} str - The string to sanitize.
+         * @returns {string} - The sanitized string.
+         */
+        function sanitizeHTML(str) {
+            const temp = document.createElement('div');
+            temp.textContent = str;
+            return temp.innerHTML;
+        }
 
-            // Call the API and get the bot's response
-            const botResponse = await callGeminiAPI(userMessage);
-
-            // Add bot's response to UI
-            addMessageToUI(botResponse, 'bot');
-
-            // Unset loading state
-            setLoading(false);
-        });
-
-        // Scroll to bottom on load (for the initial message)
-        scrollToBottom();
+        /**
+         * Shows the error message box.
+         * @param {string} message - The error message to display.
+         */
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorBox.classList.remove('hidden');
+            // Hide the error after 5 seconds
+            setTimeout(() => {
+                errorBox.classList.add('hidden');
+            }, 5000);
+        }
 
     </script>
 </body>
